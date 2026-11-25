@@ -1,0 +1,121 @@
+
+============================================================
+CONVERSATION C1 (thread_id=lina)
+============================================================
+
+[Customer -> thread=lina]: Hi, I'm Lina Haddad. What's happening with my latest order?
+[Node: agent] -> tool_call: query_database({'sql': "SELECT o.order_id, o.order_date, o.delivered_date, o.status, o.payment_method, o.total_jod FROM orders o JOIN customers c ON o.customer_id = c.customer_id WHERE c.full_name = 'Lina Haddad' ORDER BY o.order_date DESC LIMIT 1;"})
+[Node: tools] (query_database) -> result:
+order_id | order_date | delivered_date | status | payment_method | total_jod
+----------------------------------------------------------------------------
+NT-10571 | 2026-09-24 | NULL | processing | card | 85.0
+[Node: agent] -> final_response:
+Hi Lina,
+
+Your most recent order (Order # **NT‑10571**) was placed on **24 September 2026** and is currently in **“processing”** status. This means we’re still preparing the items for shipment. Once the order is shipped, the status will change to “shipped” and you’ll receive a confirmation email with the expected delivery window.
+
+If you have any specific concerns—such as needing the order sooner, changing the shipping address, or anything else—just let me know and I’ll be happy to help!
+
+[Customer -> thread=lina]: OK, please cancel it.
+[Node: agent] -> tool_call: cancel_order({'order_id': 'NT-10571'})
+
+[INTERRUPT] Human-in-the-Loop Approval Required
+  order_id: NT-10571
+  customer_name: Lina Haddad
+  order_date: 2026-09-24
+  status: processing
+  payment_method: card
+  total_jod: 85.0
+  message: Order Manager approval required to cancel order NT-10571 for Lina Haddad (status=processing, total=85.00 JOD, payment_method=card).
+[Order Manager] decision=approve
+[Node: tools] (cancel_order) -> result:
+Order 'NT-10571' for Lina Haddad (85.00 JOD, payment method: card) has been approved by the Order Manager and cancelled. Database status is now 'cancelled'.
+[Node: agent] -> final_response:
+Your order **NT‑10571** has been successfully cancelled. If you’d like to place a new order or need any further assistance, just let me know!
+
+[Customer -> thread=lina]: When will I get my money back?
+[Node: agent] -> tool_call: search_policies({'query': 'refund timeline after order cancellation'})
+[Node: tools] (search_policies) -> result:
+[Source: order_cancellation.md]
+# Cancelling an Order
+
+## While the order is "Processing"
+
+You can cancel for free from "My Orders" > "Cancel order", or by contacting customer service. Cancellation is
+confirmed by SMS. The refund follows the Refunds document.
+
+## After the order is "Shipped"
+
+The order can no longer be cancelled online. You can refuse the delivery when the courier arrives, or accept it
+and request a return under the Returns Policy.
+
+## Pay in 4 orders
+
+Cancelling a Pay in 4 order cancels all remaining instalments.
+
+## Note for customer service staff
+
+---
+
+[Source: refunds.md]
+# Refunds
+
+A refund is issued after we approve a cancellation, or after we inspect a returned item (inspection takes up to
+3 business days after the item reaches our warehouse).
+
+## Refund time by payment method
+
+---
+
+[Source: refunds.md]
+## Partial refunds
+
+If you were charged more than the price shown at checkout, we refund the difference to the original payment
+method once our billing team confirms it. Duplicate charges are refunded in full within 5 business days of
+confirmation.
+
+Delivery fees are refunded only if the return is because of our mistake (damaged, defective or wrong item).
+[Node: agent] -> tool_call: search_policies({'query': 'refund time by payment method'})
+[Node: tools] (search_policies) -> result:
+[Source: refunds.md]
+# Refunds
+
+A refund is issued after we approve a cancellation, or after we inspect a returned item (inspection takes up to
+3 business days after the item reaches our warehouse).
+
+## Refund time by payment method
+
+---
+
+[Source: refunds.md]
+## Partial refunds
+
+If you were charged more than the price shown at checkout, we refund the difference to the original payment
+method once our billing team confirms it. Duplicate charges are refunded in full within 5 business days of
+confirmation.
+
+Delivery fees are refunded only if the return is because of our mistake (damaged, defective or wrong item).
+
+---
+
+[Source: refunds.md]
+## Refund time by payment method
+
+| Payment method | Refund goes to | Time after approval |
+|----------------|----------------|---------------------|
+| Credit or debit card | The same card | 5–7 business days |
+| Bank transfer | The same bank account | 7–10 business days |
+| Cash on delivery | Bank transfer, or NovaTech store credit | Bank transfer: 7–10 business days. Store credit: immediately |
+| Pay in 4 | Remaining instalments are cancelled; paid instalments are refunded to the card | 5–7 business days |
+
+## Partial refunds
+[Node: agent] -> final_response:
+Your order **NT‑10571** was cancelled and the cancellation was approved today, 8 October 2026.  
+
+According to NovaTech’s **Refunds** policy (see *refunds.md*), a refund for a payment made by **credit/debit card** is sent back to the same card **within 5 to 7 business days** after the cancellation is approved.
+
+- **Earliest you can expect the refund:** **15 October 2026** (the 5th business day after today)  
+- **Latest you can expect the refund:** **19 October 2026** (the 7th business day after today)
+
+Business days are Monday through Friday, so weekends are not counted. If you don’t see the refund by the end of that window, just let me know and I’ll investigate further for you.
+[DB Check] NT-10571: status=cancelled, total_jod=85.0, payment_method=card
